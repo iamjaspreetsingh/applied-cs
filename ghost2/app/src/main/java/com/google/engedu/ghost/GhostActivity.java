@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,18 +32,37 @@ import java.io.InputStream;
 import java.util.Random;
 
 
-public class GhostActivity extends AppCompatActivity {
+public class GhostActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String COMPUTER_TURN = "Computer's turn";
     private static final String USER_TURN = "Your turn";
     private GhostDictionary dictionary;
     private boolean userTurn = false;
     private Random random = new Random();
+    public  TextView text,label;
+    //private String userWordNew = null;
+    private String computerWord = null;
+int whoEndFirst;
 
+    String wordFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ghost);
+        text = (TextView) findViewById(R.id.ghostText);
+        label = (TextView) findViewById(R.id.gameStatus);
+        Button challenge =(Button) findViewById(R.id.challenge);
+        Button restart=(Button) findViewById(R.id.restart);
         AssetManager assetManager = getAssets();
+        InputStream inputStream = null;
+        try {
+            inputStream = assetManager.open("words.txt");
+            dictionary = new FastDictionary(inputStream);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        challenge.setOnClickListener(this);
+        restart.setOnClickListener(this);
         /**
          **
          **  YOUR CODE GOES HERE
@@ -54,6 +74,7 @@ public class GhostActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.menu_ghost, menu);
         return true;
     }
@@ -81,8 +102,10 @@ public class GhostActivity extends AppCompatActivity {
      */
     public boolean onStart(View view) {
         userTurn = random.nextBoolean();
-        TextView text = (TextView) findViewById(R.id.ghostText);
+     //   text = (TextView) findViewById(R.id.ghostText);
         text.setText("");
+        wordFragment="";
+        whoEndFirst=userTurn?1:0;
         TextView label = (TextView) findViewById(R.id.gameStatus);
         if (userTurn) {
             label.setText(USER_TURN);
@@ -94,10 +117,50 @@ public class GhostActivity extends AppCompatActivity {
     }
 
     private void computerTurn() {
-        TextView label = (TextView) findViewById(R.id.gameStatus);
+       // label = (TextView) findViewById(R.id.gameStatus);
+        label.setText(COMPUTER_TURN);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+             computerWord=dictionary.getGoodWordStartingWith(wordFragment,whoEndFirst);
+
+                if(computerWord=="noWord"){
+                    createToast("computer wins",1000);
+                    onStart(null);
+
+                }
+                else if(computerWord=="sameAsPrefix"){
+                    createToast("computer wins",1000);
+                    onStart(null);
+
+                }
+                else
+                {
+                    if(wordFragment==null || wordFragment=="")
+                    {
+                       // System.out.println("in the wordfragment"+wordFragment);
+                       // wordFragment="";
+                        wordFragment=computerWord.substring(0,1);
+                    }
+                    else{
+                        wordFragment=computerWord.substring(0,wordFragment.length()+1);
+                    }
+                    text.setText(wordFragment);
+                }
+                userTurn = true;
+                label.setText(USER_TURN);
+
+            }
+
+            },3000);
+        /*char randch=(char) (random.nextInt(26)+97);
+        randch=Character.toLowerCase(randch);
+        wordFragment = (String) text.getText();
+        wordFragment+=randch;
+        text.setText(wordFragment);*/
         // Do computer turn stuff then make it the user's turn again
-        userTurn = true;
-        label.setText(USER_TURN);
+
     }
 
     /**
@@ -113,6 +176,70 @@ public class GhostActivity extends AppCompatActivity {
          **  YOUR CODE GOES HERE
          **
          **/
-        return super.onKeyUp(keyCode, event);
+        char c=(char)event.getUnicodeChar();
+        c=Character.toLowerCase(c);
+
+        if(c>='a' && c<='z')
+        {
+
+            wordFragment=String.valueOf(text.getText());
+            wordFragment+=c;
+            text.setText(wordFragment);
+            computerTurn();
+        }
+        else
+        {
+            createToast("invalid input",1000);
+        }
+        return false;
     }
+
+
+
+    private void createToast(String msg,int time){
+        final Toast toast = Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG);
+        toast.show();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                toast.cancel();
+            }
+        },time);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch(view.getId()){
+            case R.id.challenge:
+                  if(wordFragment.length()>=4)
+                  {
+                      String finalWord=dictionary.getGoodWordStartingWith(wordFragment,whoEndFirst);
+                      if(finalWord.equals("noWord")){
+                          createToast("you wins",3000);
+                          onStart(null);
+                      }
+                      else if(finalWord.equals("sameAsPrefix"))
+                      {
+                          createToast("You wins",3000);
+                          onStart(null);
+                      }
+                      else
+                      {
+                          createToast("computer wins! word Exists",3000);
+                          onStart(null);
+                      }
+                  }
+                  else
+                  {
+                      createToast("computer wins",3000);
+                      onStart(null);
+                  }
+                break;
+            case  R.id.restart:
+                onStart(null);
+                break;
+        }
+    }
+
 }

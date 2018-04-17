@@ -8,32 +8,41 @@ import java.util.Stack;
 
 public class StackedLayout extends LinearLayout {
 
-    private Stack<View> tiles = new Stack();
+        private Stack<View> tiles = new Stack();
 
-    public StackedLayout(Context context) {
-        super(context);
+        public StackedLayout(Context context) {
+            super(context);
+        }
+
+        public void push(View tile) {
+
+            if(!tiles.empty())removeView(tiles.peek());
+            tiles.push(tile);
+            addView(tile);
+        }
+
+        public View pop() {
+            View popped = null;
+
+            if(tiles.empty())return popped;
+            popped= tiles.pop();
+            removeView(popped);
+            addView(tiles.peek());
+            return popped;
+        }
+
+        public View peek() {
+            return tiles.peek();
+        }
+
+        public boolean empty() {
+            return tiles.empty();
+        }
+
+        public void clear() {
+
+            tiles.clear();
+            removeAllViews();
+
+        }
     }
-
-    public void push(View tile) {
-
-    }
-
-    public View pop() {
-        View popped = null;
-
-
-        return popped;
-    }
-
-    public View peek() {
-        return tiles.peek();
-    }
-
-    public boolean empty() {
-        return tiles.empty();
-    }
-
-    public void clear() {
-
-    }
-}

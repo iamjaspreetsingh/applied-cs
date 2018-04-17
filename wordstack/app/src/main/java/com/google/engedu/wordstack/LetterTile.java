@@ -7,11 +7,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.widget.TextView;
 
-public class LetterTile extends TextView {
+public class LetterTile extends android.support.v7.widget.AppCompatTextView {
 
-    public static final int TILE_SIZE = 100;
+    public static final int TILE_SIZE = 150;
     private Character letter;
     private boolean frozen;
 
@@ -26,7 +25,7 @@ public class LetterTile extends TextView {
         setBackgroundColor(Color.rgb(255, 255, 200));
     }
 
-    public char moveToViewGroup(ViewGroup targetView) {
+    public void moveToViewGroup(ViewGroup targetView) {
         ViewParent parent = getParent();
         if (parent instanceof StackedLayout ) {
             StackedLayout owner = (StackedLayout) parent;
@@ -40,10 +39,7 @@ public class LetterTile extends TextView {
             ((StackedLayout) targetView).push(this);
             unfreeze();
         }
-
-        return letter;
     }
-
 
     public void freeze() {
         frozen = true;
@@ -55,14 +51,14 @@ public class LetterTile extends TextView {
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
-
-        if(!this.frozen && motionEvent.getAction() == MotionEvent.ACTION_DOWN){
-            return startDrag(
-                    ClipData.newPlainText("", ""),
-                    new View.DragShadowBuilder(this),
-                    this,
-                    0
-            );
+        /**
+         **
+         **  YOUR CODE GOES HERE
+         **
+         **/
+        if(!frozen && motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+            startDrag(ClipData.newPlainText("",""),new View.DragShadowBuilder(this),this,0);
+            return true;
         }
 
         return super.onTouchEvent(motionEvent);
