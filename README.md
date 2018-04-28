@@ -1,7 +1,6 @@
-This workshop is part of the Applied CS with Android course:
+These codes are part of the Applied CS with Android course:
 
 http://g.co/cswithandroid
 
-Check the website for detailed instructions on how to implement this activity.
+Check the website for detailed instructions. 
 
-Version 1.0
